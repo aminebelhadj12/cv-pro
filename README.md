@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CV Pro
 
-## Getting Started
+Créateur de CV gratuit en ligne, pour le Maroc et le reste du monde.
+Remplissez vos informations, choisissez un modèle, voyez le résultat en direct et exportez en PDF.
+**Sans compte, sans base de données, sans serveur de stockage** : tout reste dans votre navigateur.
 
-First, run the development server:
+- 3 langues : français (par défaut), arabe (RTL complet) et anglais
+- 3 modèles : Classique (compatible ATS), Moderne, Créatif, avec 6 couleurs d'accent
+- Aperçu A4 en direct, onglets Édition / Aperçu sur mobile
+- Export PDF A4 via l'impression native du navigateur (texte sélectionnable)
+- Brouillon enregistré automatiquement dans `localStorage`
+
+## Technologies
+
+Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS 4, lucide-react, ESLint.
+Aucune autre dépendance : pas de base de données, pas d'authentification, pas de bibliothèque PDF.
+
+## Démarrer en local
+
+Prérequis : Node.js 20 ou plus récent.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Commande | Rôle |
+|---|---|
+| `npm run dev` | serveur de développement |
+| `npm run build` | build de production (télécharge les polices Google au build) |
+| `npm run start` | sert le build de production |
+| `npm run lint` | ESLint |
+| `npx tsc --noEmit` | vérification des types |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Avant chaque mise en ligne, suivez `TESTING.md`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Variables d'environnement
 
-## Learn More
+**Aucune n'est obligatoire.**
 
-To learn more about Next.js, take a look at the following resources:
+| Variable | Rôle |
+|---|---|
+| `NEXT_PUBLIC_SITE_URL` | (facultative) URL publique du site, par ex. `https://cvpro.ma`. Sert aux liens canoniques, au sitemap, à `robots.txt` et à Open Graph. |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Ordre de priorité de l'URL du site : `NEXT_PUBLIC_SITE_URL`, puis `VERCEL_PROJECT_PRODUCTION_URL` (fournie automatiquement par Vercel), puis `http://localhost:3000`.
+Une variable est lue **au build** : après l'avoir modifiée sur Vercel, relancez un déploiement.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Déployer sur Vercel
 
-## Deploy on Vercel
+1. Poussez le projet sur GitHub.
+2. Sur vercel.com : **Add New → Project**, importez le dépôt. Next.js est détecté automatiquement : gardez les réglages par défaut et cliquez **Deploy**.
+3. (Facultatif) Avec un nom de domaine : **Settings → Domains**, ajoutez-le, puis **Settings → Environment Variables** : `NEXT_PUBLIC_SITE_URL=https://votre-domaine` et **Redeploy**.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Note : le plan gratuit **Hobby** de Vercel est réservé à un usage personnel et non commercial.
+Si vous ajoutez de la publicité, des paiements ou un usage commercial, passez au plan Pro ou choisissez un autre hébergeur.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Structure du projet
+
+```
+app/                  pages (accueil, /builder), sitemap, robots, styles globaux
+components/
+  builder/            éditeur, sections, aperçu, export, brouillon
+  landing/            sections de la page d'accueil
+  layout/             en-tête, pied de page, sélecteur de langue
+  resume/             feuille A4, 3 modèles, mise en forme des données
+  ui/                 boutons, champs, boîte de dialogue
+lib/
+  i18n/               langue de l'interface (contexte React)
+  resume/             modèle de données, reducer, validation, persistance
+  print.ts            export PDF (impression) et nom de fichier
+  storage.ts          accès sûr à localStorage
+messages/             traductions fr / ar / en
+types/                types TypeScript
+```
+
+## Confidentialité
+
+Les données du CV ne quittent jamais le navigateur : elles sont enregistrées dans `localStorage`
+(clé `cvpro:draft:v1`) et le PDF est généré localement. « Nouveau CV » supprime le brouillon.
+
+## Limites connues
+
+- L'export utilise la fenêtre d'impression du navigateur (choisir « Enregistrer au format PDF »).
+  C'est fiable sur ordinateur (Chrome, Edge, Firefox) et moins sur téléphone.
+- Les sauts de page ne coupent pas une expérience en deux : une entrée très longue peut laisser un espace en bas de page.
+- Si le CV est ouvert dans deux onglets, la dernière modification enregistrée l'emporte.
+- Une seule URL pour les trois langues : la langue de l'interface est choisie dans l'en-tête (pas d'URL `/ar` ou `/en`).

@@ -1,26 +1,114 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Brand palette (professional blue) */
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
 }
 
+/* Inter covers Latin text; Cairo supplies the Arabic glyphs Inter lacks. */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans:
+    var(--font-inter), var(--font-cairo), ui-sans-serif, system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #f8fafc;
+    color: #0f172a;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid #2563eb;
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ---- CV sheet ------------------------------------------------------------ */
+
+/* Latin CVs use Inter; Arabic CVs use Inter for Latin glyphs and Noto Naskh Arabic for Arabic ones. */
+.cv-font-latin {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+.cv-font-arabic {
+  font-family:
+    var(--font-inter), var(--font-naskh), "Noto Naskh Arabic", serif;
+}
+
+/* Keep colours and backgrounds when the sheet is printed or exported to PDF. */
+.resume-sheet,
+.resume-sheet * {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.resume-sheet {
+  color: #0f172a;
+  overflow-wrap: anywhere;
+}
+
+/* ---- Printing / PDF export ------------------------------------------------ */
+
+/* The CV is exactly A4 with no browser margin: page margins are built into the sheet. */
+@page {
+  size: A4;
+  margin: 0;
+}
+
+/* Full-size copy of the CV used for printing: invisible on screen. */
+#print-root {
+  display: none;
+}
+
+@media print {
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    background: #ffffff !important;
+  }
+
+  body {
+    display: block !important;
+  }
+
+  /* Hide the whole site (header, editor, preview, footer)... */
+  body > *:not(#print-root) {
+    display: none !important;
+  }
+
+  /* ...and show only the CV. */
+  #print-root {
+    display: block !important;
+  }
+}
+
+/* Respect the "reduce motion" system setting. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
